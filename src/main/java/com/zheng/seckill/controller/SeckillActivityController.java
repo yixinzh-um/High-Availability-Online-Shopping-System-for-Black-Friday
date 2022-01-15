@@ -20,69 +20,10 @@ import java.util.Map;
 public class SeckillActivityController {
 
     @Autowired
-    private SeckillActivityDao seckillActivityDao;
-
-    @Autowired
     private SeckillCommodityDao seckillCommodityDao;
 
-    @RequestMapping("/seckills")
-    public String activityList(Map<String, Object> resultMap) {
-        List<SeckillActivity> seckillActivities = seckillActivityDao.querySeckillActivitysByStatus(1);
-        resultMap.put("seckillActivities", seckillActivities);
-        return "seckill_activity";
-    }
-    /**
-     * 秒杀商品详情
-     * @param resultMap
-     * @param seckillActivityId
-     * @return
-     */
-    @RequestMapping("/item/{seckillActivityId}")
-    public String itemPage(Map<String,Object> resultMap,@PathVariable long seckillActivityId){
-        SeckillActivity seckillActivity = seckillActivityDao.querySeckillActivityById(seckillActivityId);
-        SeckillCommodity seckillCommodity = seckillCommodityDao.querySeckillCommodityById(seckillActivity.getCommodityId());
 
-        resultMap.put("seckillActivity",seckillActivity);
-        resultMap.put("seckillCommodity",seckillCommodity);
-        resultMap.put("seckillPrice",seckillActivity.getSeckillPrice());
-        resultMap.put("oldPrice",seckillActivity.getOldPrice());
-        resultMap.put("commodityId",seckillActivity.getCommodityId());
-        resultMap.put("commodityName",seckillCommodity.getCommodityName());
-        resultMap.put("commodityDesc",seckillCommodity.getCommodityDesc());
-        return "seckill_item";
-    }
-    //    @ResponseBody
-    @RequestMapping("/addSeckillActivityAction")
-    public String addSeckillActivityAction(
-            @RequestParam("name") String name,
-            @RequestParam("commodityId") long commodityId,
-            @RequestParam("seckillPrice") BigDecimal seckillPrice,
-            @RequestParam("oldPrice") BigDecimal oldPrice,
-            @RequestParam("seckillNumber") long seckillNumber,
-            @RequestParam("startTime") String startTime,
-            @RequestParam("endTime") String endTime,
-            Map<String, Object> resultMap) throws ParseException {
-        startTime = startTime.substring(0, 10) + startTime.substring(11);
-        endTime = endTime.substring(0, 10) + endTime.substring(11);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-ddhh:mm");
-        SeckillActivity seckillActivity = new SeckillActivity();
-        seckillActivity.setName(name);
-        seckillActivity.setCommodityId(commodityId);
-        seckillActivity.setSeckillPrice(seckillPrice);
-        seckillActivity.setOldPrice(oldPrice);
-        seckillActivity.setTotalStock(seckillNumber);
-        seckillActivity.setAvailableStock(new Integer("" + seckillNumber));
-        seckillActivity.setLockStock(0L);
-        seckillActivity.setActivityStatus(1);
-        seckillActivity.setStartTime(format.parse(startTime));
-        seckillActivity.setEndTime(format.parse(endTime));
-        seckillActivityDao.inertSeckillActivity(seckillActivity);
-        resultMap.put("seckillActivity", seckillActivity);
-        return "add_success";
-    }
-
-
-    @RequestMapping("/a")
+    @RequestMapping("/addSeckillActivity")
     public String addSeckillActivity() {
         return "add_activity";
     }
