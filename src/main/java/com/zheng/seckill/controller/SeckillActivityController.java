@@ -26,16 +26,16 @@ public class SeckillActivityController {
     @Autowired
     private SeckillCommodityDao seckillCommodityDao;
 
-    @ResponseBody
     @RequestMapping("/addSeckillActivityAction")
     public String addSeckillActivityAction(
-            @RequestParam("name") String name,
-            @RequestParam("commodityId") long commodityId,
-            @RequestParam("seckillPrice") BigDecimal seckillPrice,
-            @RequestParam("oldPrice") BigDecimal oldPrice,
-            @RequestParam("seckillNumber") long seckillNumber,
-            @RequestParam("startTime") String startTime,
-            @RequestParam("endTime") String endTime
+        @RequestParam("name") String name,
+        @RequestParam("commodityId") long commodityId,
+        @RequestParam("seckillPrice") BigDecimal seckillPrice,
+        @RequestParam("oldPrice") BigDecimal oldPrice,
+        @RequestParam("seckillNumber") long seckillNumber,
+        @RequestParam("startTime") String startTime,
+        @RequestParam("endTime") String endTime,
+        Map<String, Object> resultMap
     ) throws ParseException {
         startTime = startTime.substring(0, 10) + startTime.substring(11);
         endTime = endTime.substring(0, 10) + endTime.substring(11);
@@ -52,7 +52,8 @@ public class SeckillActivityController {
         seckillActivity.setStartTime(format.parse(startTime));
         seckillActivity.setEndTime(format.parse(endTime));
         seckillActivityDao.inertSeckillActivity(seckillActivity);
-        return seckillActivity.toString();
+        resultMap.put("seckillActivity", seckillActivity);
+        return "add_success";
     }
 
 
