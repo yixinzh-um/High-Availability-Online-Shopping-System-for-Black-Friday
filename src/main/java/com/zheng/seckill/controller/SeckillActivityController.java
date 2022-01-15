@@ -62,4 +62,29 @@ public class SeckillActivityController {
         return "add_activity";
     }
 
+    @RequestMapping("/seckills")
+    public String activityList(Map<String, Object> resultMap) {
+        List<SeckillActivity> seckillActivities =
+                seckillActivityDao.querySeckillActivitysByStatus(1);
+        resultMap.put("seckillActivities", seckillActivities);
+        return "seckill_activity";
+    }
+
+    @RequestMapping("/item/{seckillActivityId}")
+    public String itemPage(Map<String, Object> resultMap, @PathVariable long
+            seckillActivityId) {
+        SeckillActivity seckillActivity =
+                seckillActivityDao.querySeckillActivityById(seckillActivityId);
+        SeckillCommodity seckillCommodity =
+                seckillCommodityDao.querySeckillCommodityById(seckillActivity.getCommodityId());
+        resultMap.put("seckillActivity", seckillActivity);
+        resultMap.put("seckillCommodity", seckillCommodity);
+        resultMap.put("seckillPrice", seckillActivity.getSeckillPrice());
+        resultMap.put("oldPrice", seckillActivity.getOldPrice());
+        resultMap.put("commodityId", seckillActivity.getCommodityId());
+        resultMap.put("commodityName", seckillCommodity.getCommodityName());
+        resultMap.put("commodityDesc", seckillCommodity.getCommodityDesc());
+        return "seckill_item";
+    }
+
 }
