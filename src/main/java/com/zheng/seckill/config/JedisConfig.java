@@ -44,7 +44,9 @@ public class JedisConfig extends CachingConfigurerSupport {
         jedisPoolConfig.setMaxTotal(maxActive);
         jedisPoolConfig.setMinIdle(minIdle);
         JedisPool jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout, null);
+
         logger.info("JedisPoll injection succeed!");
+        logger.info("Redis address: " + host + ":" + port);
 
         return jedisPool;
     }

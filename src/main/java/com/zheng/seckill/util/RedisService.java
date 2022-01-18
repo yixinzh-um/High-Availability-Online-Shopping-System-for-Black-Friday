@@ -45,6 +45,7 @@ public class RedisService {
                     " return -1;";
             Long stock = (Long) jedisClient.eval(script,
                     Collections.singletonList(key), Collections.emptyList());
+            System.out.println(stock);
             if (stock < 0) {
                 System.out.println("out of stock");
                 return false;

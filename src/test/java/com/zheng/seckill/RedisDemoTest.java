@@ -18,21 +18,21 @@ public class RedisDemoTest {
     @Order(1)
     @Test
     public void stockTest() {
-        redisService.setValue("stock:19",10L);
+        redisService.setValue("stock: 19",10L);
     }
     @Order(2)
     @Test
     public void getStockTest() {
-        String stock = redisService.getValue("stock:19");
+        String stock = redisService.getValue("stock: 19");
         System.out.println(stock);
     }
     @Order(3)
     @Test
     public void stockDeductValidatorTest() {
-        boolean result = redisService.stockDeductValidator(("stock:19"));
+        boolean result = redisService.stockDeductValidator(("stock: 19"));
         System.out.println("result " + result);
-        String stock = redisService.getValue("stock:19");
-        System.out.println("stock:"+stock);
+        String stock = redisService.getValue("stock: 19");
+        System.out.println("stock: "+stock);
     }
 
 
