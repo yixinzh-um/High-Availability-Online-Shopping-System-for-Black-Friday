@@ -9,6 +9,7 @@ import java.util.Collections;
 
 @Service
 public class RedisService {
+
     @Autowired
     private JedisPool jedisPool;
 

@@ -1,7 +1,10 @@
 package com.zheng.seckill;
 
+import com.zheng.seckill.db.dao.OrderDao;
 import com.zheng.seckill.db.dao.SeckillActivityDao;
+import com.zheng.seckill.db.mapper.OrderMapper;
 import com.zheng.seckill.db.mapper.SeckillActivityMapper;
+import com.zheng.seckill.db.pojo.Order;
 import com.zheng.seckill.db.pojo.SeckillActivity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,7 @@ public class DaoTest {
     private SeckillActivityDao seckillActivityDao;
 
     @Test
-    void SeckillActivityTest() {
+    public void SeckillActivityTest() {
         SeckillActivity seckillActivity = new SeckillActivity();
         seckillActivity.setName("测试");
         seckillActivity.setCommodityId(999L);
@@ -34,9 +37,19 @@ public class DaoTest {
     }
 
     @Test
-    void setSeckillActivityQuery() {
+    public void setSeckillActivityQuery() {
         List<SeckillActivity> seckillActivitys = seckillActivityDao.querySeckillActivitysByStatus(0);
         System.out.println(seckillActivitys.size());
         seckillActivitys.stream().forEach(seckillActivity -> System.out.println(seckillActivity.toString()));
     }
+
+    @Autowired
+    OrderDao orderDao;
+
+    @Test
+    public void orderDaoTest() {
+        Order order = orderDao.queryOrder("524743559841189888");
+        System.out.println(order);
+    }
+
 }
