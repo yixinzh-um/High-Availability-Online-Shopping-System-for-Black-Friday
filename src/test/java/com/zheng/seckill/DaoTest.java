@@ -20,7 +20,6 @@ public class DaoTest {
     private SeckillActivityMapper seckillActivityMapper;
     @Autowired
     private SeckillActivityDao seckillActivityDao;
-
     @Test
     public void SeckillActivityTest() {
         SeckillActivity seckillActivity = new SeckillActivity();
