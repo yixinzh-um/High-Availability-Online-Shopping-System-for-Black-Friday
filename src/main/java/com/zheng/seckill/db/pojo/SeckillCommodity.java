@@ -40,4 +40,14 @@ public class SeckillCommodity {
     public void setCommodityPrice(Integer commodityPrice) {
         this.commodityPrice = commodityPrice;
     }
+
+    @Override
+    public String toString() {
+        return "SeckillCommodity{" +
+                "id=" + id +
+                ", commodityName='" + commodityName + '\'' +
+                ", commodityDesc='" + commodityDesc + '\'' +
+                ", commodityPrice=" + commodityPrice +
+                '}';
+    }
 }

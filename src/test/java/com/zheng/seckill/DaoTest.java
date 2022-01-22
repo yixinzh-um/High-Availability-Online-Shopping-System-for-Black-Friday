@@ -2,7 +2,6 @@ package com.zheng.seckill;
 
 import com.zheng.seckill.db.dao.OrderDao;
 import com.zheng.seckill.db.dao.SeckillActivityDao;
-import com.zheng.seckill.db.mapper.OrderMapper;
 import com.zheng.seckill.db.mapper.SeckillActivityMapper;
 import com.zheng.seckill.db.pojo.Order;
 import com.zheng.seckill.db.pojo.SeckillActivity;
@@ -40,6 +39,20 @@ public class DaoTest {
         List<SeckillActivity> seckillActivitys = seckillActivityDao.querySeckillActivitysByStatus(0);
         System.out.println(seckillActivitys.size());
         seckillActivitys.stream().forEach(seckillActivity -> System.out.println(seckillActivity.toString()));
+    }
+
+    @Test
+    public void seckillActivityMapperUpdate() {
+        System.out.println(seckillActivityDao.querySeckillActivityById(Long.parseLong("9")));
+        seckillActivityMapper.lockStock(Long.valueOf("9"));
+        System.out.println(seckillActivityDao.querySeckillActivityById(Long.parseLong("9")));
+    }
+
+    @Test
+    public void seckillActivityDaoUpdate() {
+        System.out.println(seckillActivityDao.querySeckillActivityById(Long.parseLong("9")));
+        seckillActivityDao.lockStock(Long.valueOf("9"));
+        System.out.println(seckillActivityDao.querySeckillActivityById(Long.parseLong("9")));
     }
 
     @Autowired

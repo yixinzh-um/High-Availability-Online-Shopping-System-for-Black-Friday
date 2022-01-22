@@ -82,4 +82,18 @@ public class Order {
     public void setPayTime(Date payTime) {
         this.payTime = payTime;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", orderNo='" + orderNo + '\'' +
+                ", orderStatus=" + orderStatus +
+                ", seckillActivityId=" + seckillActivityId +
+                ", userId=" + userId +
+                ", orderAmount=" + orderAmount +
+                ", createTime=" + createTime +
+                ", payTime=" + payTime +
+                '}';
+    }
 }

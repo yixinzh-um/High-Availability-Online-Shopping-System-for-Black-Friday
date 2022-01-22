@@ -1,4 +1,4 @@
-package com.zheng.seckill.db.mapper;
+package com.zheng.seckill.db.pojo.mapper;
 
 import com.zheng.seckill.db.pojo.SeckillCommodity;
 
