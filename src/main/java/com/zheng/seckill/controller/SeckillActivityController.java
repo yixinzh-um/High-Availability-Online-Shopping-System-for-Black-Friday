@@ -7,6 +7,7 @@ import com.zheng.seckill.db.pojo.Order;
 import com.zheng.seckill.db.pojo.SeckillActivity;
 import com.zheng.seckill.db.pojo.SeckillCommodity;
 import com.zheng.seckill.service.SeckillActivityService;
+import com.zheng.seckill.util.RedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,9 @@ public class SeckillActivityController {
 
     @Autowired
     private OrderDao orderDao;
+
+    @Autowired
+    private RedisService redisService;
 
     @RequestMapping("/addSeckillActivityAction")
     public String addSeckillActivityAction(
@@ -100,18 +104,25 @@ public class SeckillActivityController {
     }
 
     /**
-     * deal with seckill order request
+     * deal with seckill order request,
      * @param userId
      * @param seckillActivityId
      * @return
      */
-//    @ResponseBody
     @RequestMapping("/seckill/buy/{userId}/{seckillActivityId}")
     public ModelAndView seckillCommodity(@PathVariable long userId, @PathVariable long seckillActivityId) {
         boolean stockValidateResult = false;
 
         ModelAndView modelAndView = new ModelAndView();
         try {
+            // check whether the user is in the purchased list
+            if (redisService.isInLimitMember(seckillActivityId, userId)) {
+                // notify the user already in the purchased list, return the result
+                modelAndView.addObject("resultInfo", "Sorry, you are already in the purchased list");
+                modelAndView.setViewName("seckill_result");
+                return modelAndView;
+            }
+
             //Verify whether the seckill can be performed
             stockValidateResult = seckillActivityService.seckillStockValidator(seckillActivityId);
             if (stockValidateResult) {
@@ -119,6 +130,7 @@ public class SeckillActivityController {
                 modelAndView.addObject("resultInfo",
                         "Seckill successful, order creating, order ID: " + order.getOrderNo());
                 modelAndView.addObject("orderNo", order.getOrderNo());
+                redisService.addLimitMember(seckillActivityId, userId);
             } else {
                 modelAndView.addObject("resultInfo", "Sorry, this item is out of stock");
             }
@@ -137,7 +149,7 @@ public class SeckillActivityController {
      */
     @RequestMapping("/seckill/orderQuery/{orderNo}")
     public ModelAndView orderQuery(@PathVariable String orderNo) {
-        log.info("query the order， order Number: " + orderNo);
+        log.info("Query the order， order Number: " + orderNo);
         Order order = orderDao.queryOrder(orderNo);
         ModelAndView modelAndView = new ModelAndView();
 
@@ -158,7 +170,7 @@ public class SeckillActivityController {
      * @return
      */
     @RequestMapping("/seckill/payOrder/{orderNo}")
-    public String payOrder(@PathVariable String orderNo){
+    public String payOrder(@PathVariable String orderNo) throws Exception {
         seckillActivityService.payOrderProcess(orderNo);
         return "redirect:/seckill/orderQuery/" + orderNo;
     }

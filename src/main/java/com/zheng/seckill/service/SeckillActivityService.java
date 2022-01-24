@@ -72,14 +72,38 @@ public class SeckillActivityService {
      * @return
      */
 
-    public void payOrderProcess(String orderNo) {
+    public void payOrderProcess(String orderNo) throws Exception {
         log.info("Payment made. Order : " + orderNo);
         Order order = orderDao.queryOrder(orderNo);
-        boolean deductStockResult = seckillActivityDao.deductStock(order.getSeckillActivityId());
-        if (deductStockResult) {
-            order.setPayTime(new Date());
-            order.setOrderStatus(2);
-            orderDao.updateOrder(order);
+
+        /**
+         * 1. check if the order exists or not
+         * 2. check if the order status is paid or not
+         */
+
+        // The order does not exist
+        if (order == null) {
+            log.error("The order corresponding to the order number does not exist: " + orderNo);
+            return;
         }
+        // The order exists, but its status is invalid (not paid)
+        if (order.getOrderStatus() != 1) {
+            log.error("Invalid order status: " + orderNo);
+            return;
+        }
+
+        // The order exists with valid status
+        order.setPayTime(new Date());
+        // order status 0 : out of stock, invalid order
+        //              1 : order created, wait for payment
+        //              2 : payment completed
+
+        order.setOrderStatus(2);
+        orderDao.updateOrder(order);
+
+        /**
+         * 3. Send order payment success message
+         */
+        rocketMQService.sendMessage("pay_done", JSON.toJSONString(order));
     }
 }
