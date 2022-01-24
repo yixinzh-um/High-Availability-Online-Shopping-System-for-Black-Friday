@@ -1,15 +1,20 @@
 package com.zheng.seckill.service;
 
 import com.alibaba.fastjson.JSON;
+import com.zheng.seckill.db.dao.OrderDao;
 import com.zheng.seckill.db.dao.SeckillActivityDao;
 import com.zheng.seckill.db.pojo.Order;
 import com.zheng.seckill.db.pojo.SeckillActivity;
 import com.zheng.seckill.mq.RocketMQService;
 import com.zheng.seckill.util.RedisService;
 import com.zheng.seckill.util.SnowFlake;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
+@Slf4j
 @Service
 public class SeckillActivityService {
     @Autowired
@@ -20,6 +25,9 @@ public class SeckillActivityService {
 
     @Autowired
     private RocketMQService rocketMQService;
+
+    @Autowired
+    private OrderDao orderDao;
 
     private SnowFlake snowFlake = new SnowFlake(1, 1);
 
@@ -53,4 +61,19 @@ public class SeckillActivityService {
         return redisService.stockDeductValidator(key);
     }
 
+    /** Process order Payment
+     * @param orderNo order number
+     * @return
+     */
+
+    public void payOrderProcess(String orderNo) {
+        log.info("Payment made. Order : " + orderNo);
+        Order order = orderDao.queryOrder(orderNo);
+        boolean deductStockResult = seckillActivityDao.deductStock(order.getSeckillActivityId());
+        if (deductStockResult) {
+            order.setPayTime(new Date());
+            order.setOrderStatus(2);
+            orderDao.updateOrder(order);
+        }
+    }
 }
