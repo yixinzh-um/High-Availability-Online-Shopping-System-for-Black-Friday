@@ -47,6 +47,12 @@ public class SeckillActivityService {
          * 2. send the message of creating order
          */
         rocketMQService.sendMessage("seckill_order", JSON.toJSONString(order));
+        /**
+         * 3.Send order payment status verification message
+         * messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m
+         30m 1h 2h
+         */
+        rocketMQService.sendDelayMessage("pay_check", JSON.toJSONString(order), 3);
         return order;
     }
 
