@@ -1,5 +1,6 @@
 package com.zheng.seckill.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.zheng.seckill.db.dao.OrderDao;
 import com.zheng.seckill.db.dao.SeckillActivityDao;
 import com.zheng.seckill.db.dao.SeckillCommodityDao;
@@ -8,7 +9,9 @@ import com.zheng.seckill.db.pojo.SeckillActivity;
 import com.zheng.seckill.db.pojo.SeckillCommodity;
 import com.zheng.seckill.service.SeckillActivityService;
 import com.zheng.seckill.util.RedisService;
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,12 +90,26 @@ public class SeckillActivityController {
     }
 
     @RequestMapping("/item/{seckillActivityId}")
-    public String itemPage(Map<String, Object> resultMap, @PathVariable long
-            seckillActivityId) {
-        SeckillActivity seckillActivity =
-                seckillActivityDao.querySeckillActivityById(seckillActivityId);
-        SeckillCommodity seckillCommodity =
-                seckillCommodityDao.querySeckillCommodityById(seckillActivity.getCommodityId());
+    public String itemPage(Map<String, Object> resultMap, @PathVariable long seckillActivityId) {
+        SeckillActivity seckillActivity;
+        SeckillCommodity seckillCommodity;
+
+        String seckillActivityInfo = redisService.getValue("seckillActivity: " + seckillActivityId);
+        if (StringUtils.isNotEmpty(seckillActivityInfo)) {
+            log.info("Redis cache data: " + seckillActivityInfo);
+            seckillActivity = JSON.parseObject(seckillActivityInfo, SeckillActivity.class);
+        } else {
+            seckillActivity = seckillActivityDao.querySeckillActivityById(seckillActivityId);
+        }
+
+        String seckillCommodityInfo = redisService.getValue("seckillCommodity: " + seckillActivity.getCommodityId());
+        if (StringUtils.isNotEmpty(seckillCommodityInfo)) {
+            log.info("Redis cache data: " + seckillCommodityInfo);
+            seckillCommodity = JSON.parseObject(seckillCommodityInfo, SeckillCommodity.class);
+        } else {
+            seckillCommodity = seckillCommodityDao.querySeckillCommodityById(seckillActivity.getCommodityId());
+        }
+
         resultMap.put("seckillActivity", seckillActivity);
         resultMap.put("seckillCommodity", seckillCommodity);
         resultMap.put("seckillPrice", seckillActivity.getSeckillPrice());

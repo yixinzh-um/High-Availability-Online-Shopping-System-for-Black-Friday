@@ -3,8 +3,10 @@ package com.zheng.seckill.service;
 import com.alibaba.fastjson.JSON;
 import com.zheng.seckill.db.dao.OrderDao;
 import com.zheng.seckill.db.dao.SeckillActivityDao;
+import com.zheng.seckill.db.dao.SeckillCommodityDao;
 import com.zheng.seckill.db.pojo.Order;
 import com.zheng.seckill.db.pojo.SeckillActivity;
+import com.zheng.seckill.db.pojo.SeckillCommodity;
 import com.zheng.seckill.mq.RocketMQService;
 import com.zheng.seckill.util.RedisService;
 import com.zheng.seckill.util.SnowFlake;
@@ -28,6 +30,9 @@ public class SeckillActivityService {
 
     @Autowired
     private OrderDao orderDao;
+
+    @Autowired
+    private SeckillCommodityDao seckillCommodityDao;
 
     private SnowFlake snowFlake = new SnowFlake(1, 1);
 
@@ -66,6 +71,20 @@ public class SeckillActivityService {
         String key = "stock: " + activityId;
         return redisService.stockDeductValidator(key);
     }
+
+    /** Push seckill infomation to Redis
+     * @param seckillActivityId seckill activity id
+     * @return
+     */
+
+    public void pushSeckillInfoToRedis(long seckillActivityId) {
+        SeckillActivity seckillActivity = seckillActivityDao.querySeckillActivityById(seckillActivityId);
+        redisService.setValue("seckillActivity: " +seckillActivityId, JSON.toJSONString(seckillActivity));
+
+        SeckillCommodity seckillCommodity = seckillCommodityDao.querySeckillCommodityById(seckillActivity.getCommodityId());
+        redisService.setValue("seckillCommodity: " + seckillActivity.getCommodityId(), JSON.toJSONString(seckillCommodity));
+    }
+
 
     /** Process order Payment
      * @param orderNo order number
