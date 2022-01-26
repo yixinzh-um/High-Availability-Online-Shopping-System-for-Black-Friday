@@ -1,5 +1,12 @@
 package com.zheng.seckill.controller;
 
+import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
+import com.alibaba.csp.sentinel.slots.block.RuleConstant;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import com.alibaba.fastjson.JSON;
 import com.zheng.seckill.db.dao.OrderDao;
 import com.zheng.seckill.db.dao.SeckillActivityDao;
@@ -20,9 +27,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -84,11 +93,17 @@ public class SeckillActivityController {
 
     @RequestMapping("/seckills")
     public String activityList(Map<String, Object> resultMap) {
-        List<SeckillActivity> seckillActivities =
-                seckillActivityDao.querySeckillActivitysByStatus(1);
-        resultMap.put("seckillActivities", seckillActivities);
-        return "seckill_activity";
+        try(Entry entry = SphU.entry("seckills")) {
+            List<SeckillActivity> seckillActivities = seckillActivityDao.querySeckillActivitysByStatus(1);
+            resultMap.put("seckillActivities", seckillActivities);
+            return "seckill_activity";
+        } catch (BlockException e) {
+            log.error("Querying the list of seckill activities is limited. " + e.toString());
+            return "wait";
+        }
     }
+
+
 
     @RequestMapping("/item/{seckillActivityId}")
     public String itemPage(Map<String, Object> resultMap, @PathVariable long seckillActivityId) {
@@ -131,8 +146,9 @@ public class SeckillActivityController {
     public ModelAndView seckillCommodity(@PathVariable long userId, @PathVariable long seckillActivityId) {
         boolean stockValidateResult = false;
 
+
         ModelAndView modelAndView = new ModelAndView();
-        try {
+        try (Entry entry = SphU.entry("seckillBuy")){
             // check whether the user is in the purchased list
             if (redisService.isInLimitMember(seckillActivityId, userId)) {
                 // notify the user already in the purchased list, return the result
@@ -152,6 +168,10 @@ public class SeckillActivityController {
             } else {
                 modelAndView.addObject("resultInfo", "Sorry, this item is out of stock");
             }
+        } catch (FlowException e) {
+            log.error("No hurries. Please try again later. " + e.toString());
+            modelAndView.setViewName("wait");
+            return modelAndView;
         } catch (Exception e) {
             log.error("There is something wrong with seckill system, " + e.toString());
             modelAndView.addObject("resultInfo", "Failed to seckill");
